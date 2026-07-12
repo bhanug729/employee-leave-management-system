@@ -60,20 +60,20 @@ public class EmployeeController {
     }
 
     /** Called internally by leave-service when a leave request is approved. */
-    @PutMapping("/{id}/deduct-leave")
-    public ResponseEntity<Void> deductLeave(@PathVariable("id") Long id,
+    @PutMapping("/{employeeCode}/deduct-leave")
+    public ResponseEntity<Void> deductLeave(@PathVariable("employeeCode") String employeeCode,
                                             @RequestParam("days") Integer days) {
-        log.info("Received internal request to deduct {} leave day(s) for employee id: {}", days, id);
-        employeeService.deductLeave(id, days);
+        log.info("Received internal request to deduct {} leave day(s) for employee code: {}", days, employeeCode);
+        employeeService.deductLeave(employeeCode, days);
         return ResponseEntity.ok().build();
     }
 
     /** Called internally by leave-service when an approved leave is later cancelled. */
-    @PutMapping("/{id}/restore-leave")
-    public ResponseEntity<Void> restoreLeave(@PathVariable("id") Long id,
+    @PutMapping("/{employeeCode}/restore-leave")
+    public ResponseEntity<Void> restoreLeave(@PathVariable("employeeCode") String employeeCode,
                                              @RequestParam("days") Integer days) {
-        log.info("Received internal request to restore {} leave day(s) for employee id: {}", days, id);
-        employeeService.restoreLeave(id, days);
+        log.info("Received internal request to restore {} leave day(s) for employee code: {}", days, employeeCode);
+        employeeService.restoreLeave(employeeCode, days);
         return ResponseEntity.ok().build();
     }
 }

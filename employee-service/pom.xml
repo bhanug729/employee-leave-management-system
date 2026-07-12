@@ -5,17 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.bhanu</groupId>
-        <artifactId>employee-leave-management-app</artifactId>
+        <artifactId>employee-leave-management-system</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>employee-service</artifactId>
-
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <name>Employee Service</name>
+    <description>Employee management microservice</description>
 
     <dependencies>
         <dependency>
@@ -40,6 +36,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

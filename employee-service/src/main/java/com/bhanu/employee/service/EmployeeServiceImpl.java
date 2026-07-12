@@ -50,8 +50,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public @Nullable EmployeeResponse getEmployeeByCode(String employeeCode) {
         log.debug("Fetching employee with code: {}", employeeCode);
-        Employee employee = employeeRepository.findByEmployeeCode(employeeCode)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with code: " + employeeCode));
+        Employee employee = findEmployeeByCodeOrThrow(employeeCode);
         return EmployeeTransformer.employeetoEmployeeResponse(employee);
     }
 
@@ -89,27 +88,27 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    public void deductLeave(Long id, Integer days) {
-        log.info("Deducting {} leave day(s) for employee id: {}", days, id);
-        Employee employee = findEmployeeOrThrow(id);
+    public void deductLeave(String employeeCode, Integer days) {
+        log.info("Deducting {} leave day(s) for employee code: {}", days, employeeCode);
+        Employee employee = findEmployeeByCodeOrThrow(employeeCode);
         if (employee.getAnnualLeaveBalance() < days) {
-            log.error("Insufficient leave balance for employee id: {}. Balance: {}, Requested: {}",
-                    id, employee.getAnnualLeaveBalance(), days);
-            throw new InsufficientLeaveBalanceException("Insufficient leave balance for employee: " + employee.getEmployeeCode());
+            log.error("Insufficient leave balance for employee code: {}. Balance: {}, Requested: {}",
+                    employeeCode, employee.getAnnualLeaveBalance(), days);
+            throw new InsufficientLeaveBalanceException("Insufficient leave balance for employee: " + employeeCode);
         }
         employee.setAnnualLeaveBalance(employee.getAnnualLeaveBalance() - days);
         employeeRepository.save(employee);
-        log.info("Leave deducted for employee id: {}. New balance: {}", id, employee.getAnnualLeaveBalance());
+        log.info("Leave deducted for employee code: {}. New balance: {}", employeeCode, employee.getAnnualLeaveBalance());
     }
 
     @Override
     @org.springframework.transaction.annotation.Transactional
-    public void restoreLeave(Long id, Integer days) {
-        log.info("Restoring {} leave day(s) for employee id: {}", days, id);
-        Employee employee = findEmployeeOrThrow(id);
+    public void restoreLeave(String employeeCode, Integer days) {
+        log.info("Restoring {} leave day(s) for employee code: {}", days, employeeCode);
+        Employee employee = findEmployeeByCodeOrThrow(employeeCode);
         employee.setAnnualLeaveBalance(employee.getAnnualLeaveBalance() + days);
         employeeRepository.save(employee);
-        log.info("Leave restored for employee id: {}. New balance: {}", id, employee.getAnnualLeaveBalance());
+        log.info("Leave restored for employee code: {}. New balance: {}", employeeCode, employee.getAnnualLeaveBalance());
     }
 
     private Employee findEmployeeOrThrow(Long id) {
@@ -118,6 +117,15 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(() -> {
                     log.error("Employee not found with id: {}", id);
                     return new EmployeeNotFoundException("Employee not found with id: " + id);
+                });
+    }
+
+    private Employee findEmployeeByCodeOrThrow(String employeeCode) {
+        return employeeRepository
+                .findByEmployeeCode(employeeCode)
+                .orElseThrow(() -> {
+                    log.error("Employee not found with code: {}", employeeCode);
+                    return new EmployeeNotFoundException("Employee not found with code: " + employeeCode);
                 });
     }
 }

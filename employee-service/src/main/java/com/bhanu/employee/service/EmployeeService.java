@@ -14,6 +14,6 @@ public interface EmployeeService {
     @Nullable List<EmployeeResponse> getAllEmployees();
     @Nullable EmployeeResponse updateEmployee(Long id, @Valid EmployeeRequest request);
     void deleteEmployee(Long id);
-    void deductLeave(Long id, Integer days);
-    void restoreLeave(Long id, Integer days);
+    void deductLeave(String employeeCode, Integer days);
+    void restoreLeave(String employeeCode, Integer days);
 }
