@@ -11,11 +11,16 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Imperative REST client for employee-service, built on RestTemplate rather than Feign
+ * "employee-service" in the URL is a logical Eureka service ID; the
+ * @LoadBalanced RestTemplate resolves it to a real instance at call time.
+ */
 @Component
 @RequiredArgsConstructor
 public class EmployeeClient {
     private static final Logger log = LoggerFactory.getLogger(EmployeeClient.class);
-    private static final String SERVICE_URL = "http://localhost:8080/employee";
+    private static final String SERVICE_URL = "http://employee-service/employee";
 
     private final RestTemplate restTemplate;
 
