@@ -1,6 +1,6 @@
 # Employee Leave Management System
 
-A microservices-based HR leave-management system built with **Spring Boot 4**, **Spring Cloud**, and **MySQL**. Employees and Leave Applications are owned by independent services that discover each other through **Eureka** and communicate synchronously through a **load-balanced RestTemplate**, all fronted by a single **API Gateway**.
+A microservices-based HR leave-management system built with **Spring Boot 4**, **Spring Cloud**, and **MySQL**. Employees and Leave Applications are owned by independent services that discover each other through **Eureka** and communicate synchronously through a **load-balanced RestClient**, all fronted by a single **API Gateway**.
 
 ## Architecture
 
@@ -19,7 +19,7 @@ A microservices-based HR leave-management system built with **Spring Boot 4**, *
         │      :8081       │    │    :8080    │    │     :8082     │
         └────▼────────▲────┘    └─────────────┘    └────▼─────▼────┘
              │        │                                 │     │
-             │        │  RestTemplate(@LoadBalanced)    │     │
+             │        │    RestClient(@LoadBalanced)    │     │
              │        └─────────────────────────────────┘     │
              │             ┌─────────────────────┐            │
              └────────────►│   MySQL (employee,  │◄───────────┘
@@ -29,11 +29,11 @@ A microservices-based HR leave-management system built with **Spring Boot 4**, *
 
 ## Key Features
 * Centralized exception handling with `@RestControllerAdvice` for consistent error responses
-* Service discovery and load balancing via Eureka + RestTemplate
+* Service discovery and load balancing via Eureka + RestClient
 * Leave balance deducted only on approval, restored on cancellation
 
 ## Leave approval workflow
-1. `POST /leaves/apply` - employee applies for leave. `leave-service` calls `employee-service` (via `RestTemplate`) to confirm the employee exists and has enough balance, then stores the request as `PENDING`. **Balance is not touched yet.**
+1. `POST /leaves/apply` - employee applies for leave. `leave-service` calls `employee-service` (via `RestClient`) to confirm the employee exists and has enough balance, then stores the request as `PENDING`. **Balance is not touched yet.**
 2. `PUT /leaves/{leave_id}/approve` - manager approves. Only now does `leave-service` call `employee-service` to actually deduct the days, then flips status to `APPROVED`.
 3. `PUT /leaves/{leave_id}/reject`  - manager rejects a `PENDING` request. No balance was ever deducted, so nothing to restore.
 4. `PUT /leaves/{leave_id}/cancel`  - if the leave was `APPROVED`, the days are restored via another cross-service call before marking it `CANCELLED`.
@@ -47,7 +47,7 @@ A microservices-based HR leave-management system built with **Spring Boot 4**, *
 | Microservices | Spring Cloud 2025.1.2 (Oakwood)                              |
 | Service Discovery | Netflix Eureka                                               |
 | API Gateway | Spring Cloud Gateway                                         |
-| Inter-service calls | `RestTemplate` + `@LoadBalanced` (Spring Cloud LoadBalancer) |
+| Inter-service calls | `RestClient` + `@LoadBalanced` (Spring Cloud LoadBalancer) |
 | Persistence | Spring Data JPA / Hibernate + MySQL                          |
 | Exception Handling | @RestControllerAdvice + GlobalExceptionHandler               |
 | Logging | LogBack/Log4j2 (via SLF4J)                                   |
@@ -59,7 +59,7 @@ employee-leave-management-system/
 ├── eureka-server/     # Service registry (:8761)
 ├── api-gateway/       # Single entry point, routes by path (:8080)
 ├── employee-service/  # Owns Employee data + leave balance (:8081)
-├── leave-service/     # Owns Leave Application data, calls employee-service via RestTemplate (:8082)
+├── leave-service/     # Owns Leave Application data, calls employee-service via RestClient (:8082)
 └── README.md
 ```
 
@@ -119,4 +119,3 @@ All requests go through the gateway at http://localhost:8080.
 * **Security:** Add Spring Security + JWT with API Gateway authentication filter
 * **Testing:** Unit & Integration tests for employee-service and leave-service
 * **Notifications:** Email service for leave approval / rejection events
-* **Resilience:** Migrate from RestTemplate to OpenFeign + Retry / Circuit Breaker with Resilience4j
